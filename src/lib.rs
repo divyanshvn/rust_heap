@@ -27,11 +27,17 @@ pub mod fibonacci_heap;
 
 pub enum HeapType {
     BinaryHeap,
-    FibonacciHeap,
+    // FibonacciHeap,
+}
+
+fn less_than(item1: &String, item2: &String) -> bool {
+    item1 < item2
 }
 
 #[cfg(test)]
 mod tests {
+    use binary_heap::BinaryHeap;
+
     use super::*;
 
     #[test]
@@ -40,5 +46,62 @@ mod tests {
         assert_eq!(result, 4);
     }
 
-    fn test_heap() {}
+    fn test_heap_get_max(heap_type: HeapType) {
+        let mut heap = match heap_type {
+            HeapType::BinaryHeap => BinaryHeap::new(Vec::new(), &less_than),
+        };
+        let item1 = "item1".to_owned();
+        let item2 = "item2".to_owned();
+
+        heap.push_heap(item2.clone());
+        heap.push_heap(item1.clone());
+
+        assert_eq!(
+            heap.get_max(),
+            if less_than(&item1, &item2) {
+                &item1
+            } else {
+                &item2
+            }
+        );
+    }
+
+    fn test_heap_pop(heap_type: HeapType) {
+        let mut heap = match heap_type {
+            HeapType::BinaryHeap => BinaryHeap::new(Vec::new(), &less_than),
+        };
+        let item1 = "item1".to_owned();
+        let item2 = "item2".to_owned();
+        let item3 = "item3".to_owned();
+
+        heap.push_heap(item1.clone());
+        heap.push_heap(item2.clone());
+        heap.push_heap(item3.clone());
+
+        assert_eq!(heap.pop_heap(), Some(item1));
+        assert!(!heap.is_empty());
+        assert_eq!(heap.get_max(), &item2);
+    }
+
+    fn test_empty_heap(heap_type: HeapType) {
+        let mut heap = match heap_type {
+            HeapType::BinaryHeap => BinaryHeap::new(Vec::new(), &less_than),
+        };
+        assert_eq!(heap.pop_heap(), None);
+    }
+
+    #[test]
+    fn test_binary_heap_pop() {
+        test_heap_pop(HeapType::BinaryHeap);
+    }
+
+    #[test]
+    fn test_binary_heap_empty() {
+        test_empty_heap(HeapType::BinaryHeap);
+    }
+
+    #[test]
+    fn test_binary_heap_get_max() {
+        test_heap_get_max(HeapType::BinaryHeap);
+    }
 }

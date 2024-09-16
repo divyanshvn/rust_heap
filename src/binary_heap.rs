@@ -9,8 +9,6 @@ where
     // this error gone now ?
     heap_array: Vec<T>,
     sorting_fn: &'a dyn Fn(&T, &T) -> bool,
-    //todo: restrict access of these fields to just be modified (or populated or initialised)
-    //through member functions
 }
 
 impl<'a, T> BinaryHeap<'a, T>
@@ -36,10 +34,10 @@ where
     }
 
     fn heapify(&mut self, index: usize) {
-        let parent_index = Self::get_parent_index(index);
         if index == 0 {
             return;
         }
+        let parent_index = Self::get_parent_index(index);
         if self.le(parent_index, index) {
             return;
         }
@@ -52,7 +50,6 @@ where
         if index * 2 > self.heap_array.len() {
             return;
         }
-        // note: always need to use self or Self depending upon the type of function.
         let child_tuple = Self::get_children_indices(index);
 
         let min_child =
@@ -70,10 +67,6 @@ where
         self.sift_down(min_child);
     }
 
-    // weired stuff with lifetimes here. Had to include the same lifetime in this function to the
-    // implementation declaration for this error to go away which demands that sorting_fun lives
-    // longer than the Heap object.
-    // Investigate if time
     pub fn new(array: Vec<T>, sorting_fun: &'a dyn Fn(&T, &T) -> bool) -> BinaryHeap<'a, T> {
         let mut new_heap = Self {
             sorting_fn: sorting_fun,
@@ -98,11 +91,8 @@ where
 {
     type ItemType = T;
 
-    // not need to put generic trait definition because that's already present in teh impl
-    // definition
     fn push_heap(&mut self, item: T) {
         self.heap_array.push(item);
-        // Investigate: is there no need to define fields as mut ?
 
         self.heapify(self.heap_array.len() - 1);
     }
@@ -112,15 +102,13 @@ where
             return None;
         }
 
-        let last_pos = self.heap_array.len();
-        // directly using the len function in the function below gave error because of borrow of
-        // the array through the len call. Investigate why ? I mean I get it if it had been direct
-        // usage of a field but a function's return value? like isn't this first calculated and
-        // then the swap function being called ?
+        let last_pos = self.heap_array.len() - 1;
         self.heap_array.swap(0, last_pos);
+        let ret_val = self.heap_array.pop();
+
         self.sift_down(0);
 
-        return self.heap_array.pop();
+        return ret_val;
     }
 
     fn get_max(&self) -> &T {
